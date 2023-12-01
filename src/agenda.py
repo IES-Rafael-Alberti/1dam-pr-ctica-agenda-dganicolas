@@ -39,7 +39,7 @@ def borrar_consola(): #funciona
         os.system ("cls")
 
 
-def cargar_contactos(contactos: list): #funciona, pasa el pytest
+def cargar_contactos(contactos: list): #funciona, pasa el pytest no modificar
     """ Carga los contactos iniciales de la agenda desde un fichero
     ...
     """
@@ -69,10 +69,7 @@ def cargar_contactos(contactos: list): #funciona, pasa el pytest
             tlfn.clear()
             diccionario_clientes.clear()
 
-def pedir_email_eliminar():
-    return input("dame el email del cliente: ")
-
-def buscar_contacto(email,contactos: list):#funciona , pytest funciona
+def buscar_contacto(contactos: list,email):#funciona , pytest funciona, no modificar
 # esto lo que ase es que tu tienes la lista te la recorre si hay un valor que esta dentro de email te retorna pos quees la posicion de la lista intermanete tengo[d,d1,d2,d3,d4] donde d3 esta en la pos 3, al no poner nada por defecto las funciones retornan none
     pos=0
     for clientes in contactos:
@@ -80,17 +77,22 @@ def buscar_contacto(email,contactos: list):#funciona , pytest funciona
             return pos
         pos+=1
 
-def eliminar_contacto(contactos: list):#funciona
+def eliminar_contacto(email,contactos: list):#funciona
     """ Elimina un contacto de la agenda
     ...
     """
     try:
         #TODO: Crear función buscar_contacto para recuperar la posición de un contacto con un email determinado
-        pos = buscar_contacto(input("Dame el email del cliente a eliminar"),contactos)
+        borrar_consola()
+        pos = buscar_contacto(contactos,email)
+        numeros=""
         if pos != None:
+            dato=contactos[pos]
+            for i in range(len(dato['telefonos'])):
+                numeros+= f" {dato['telefonos'][i]}"    
+            print(f"se elimino el contacto {dato['nombre']} {dato['apellido']} con email: {dato['email']}\n los telefono/s son:{numeros}")
             del contactos[pos]
             print("Se eliminó 1 contacto")
-            print(contactos)
         else:
             print("No se encontró el contacto para eliminar")
     except Exception as e:
@@ -100,7 +102,7 @@ def eliminar_contacto(contactos: list):#funciona
 def mostrar_menu():#funciona
     print("1. Nuevo contacto\n2. Modificar contacto\n3. Eliminar contacto\n4. Vaciar agenda\n5. Cargar agenda inicial\n6. Mostrar contactos por criterio\n7. Mostrar la agenda completa\n8. Salir")
 
-def pedir_opcion():
+def pedir_opcion():#funciona pytest, no modificar
     numero= input(">> Seleccione una opción:")
     numero=diferencia_simetrica_sino_diego_no_aprueba(numero)
     return numero
@@ -120,13 +122,12 @@ def diferencia_simetrica_sino_diego_no_aprueba(opcion): #pasa el py test funcion
         print(f"la opcion no es una opcion valida")
         return -1
 
-
 def modificar_contacto(contactos:list):
     borrar_consola()
     print
     try:
         #TODO: Crear función buscar_contacto para recuperar la posición de un contacto con un email determinado
-        pos = buscar_contacto(input("dame el email del cliente a modificar"),contactos)
+        pos = buscar_contacto(contactos,input("dame el email del cliente a modificar: "))
         if pos != None:
             print("que quieres modificar\nnombre\napellido\nemail\ntelefono")
             clave=input("¿que quieres modificar?")
@@ -137,9 +138,61 @@ def modificar_contacto(contactos:list):
             print(f"Se modifico el contacto")
         else:
             print("No se encontró el contacto para modificar")
+            pulse_tecla_para_continuar()
     except Exception as e:
         print(f"**Error** {e}")
         print("No se modifico ningún contacto")
+
+def vaciar_agenda(contactos: list):
+    borrar_consola()
+    print("se va a eliminar la agenda ENTERA")
+    confirmacion=input("¿esta seguro de eliminar la agenda?(si/NO)").upper()
+    borrar_consola()
+    if confirmacion=="SI":
+        contactos.clear()
+        print("se elimino la agenda")
+    else:
+        print("no se elimino la agenda")
+
+def recargar_contactos(contactos):
+    borrar_consola()
+    cargar_contactos(contactos)
+    print(f"se cargaron contactos {len(contactos)} a la agenda")
+
+def ordenar_agenda(contactos):
+    diccionario={}
+    lista_telefonos=[]
+    ordenar=input("como quieres ordenar la lista(nombre/apellido/email/telefonos): ")
+    valor=input("cual es el valor a buscar: ")
+    if "nombre"==ordenar or "apellido"==ordenar or "email"==ordenar:
+        for elementos in contactos:
+            diccionario[elementos[ordenar]]=elementos
+        diccionario_ord = dict(sorted(diccionario.items()))
+        lista=lista_ordenada(diccionario_ord)
+        lista_solo_valor=[]
+        for i in lista:
+            if i[ordenar] ==valor:
+                lista_solo_valor.append(i)
+        borrar_consola()
+        mostrar_contactos(lista_solo_valor)
+    elif "telefonos" ==ordenar:
+        for elementos in contactos:
+            lista=elementos['telefonos']
+            for j in range (len(lista)):
+                if lista[j]== valor:
+                    lista_telefonos.append(elementos)
+        borrar_consola()
+        mostrar_contactos(lista_telefonos)
+
+            
+    else:
+        "***ERROR*** --has introducido los parametros mal"
+
+def lista_ordenada(diccionario_ord):
+    lista=[]
+    for elementos in diccionario_ord:
+        lista.append(diccionario_ord[elementos])
+    return lista
 
 def agenda(contactos: list):
     """ Ejecuta el menú de la agenda con varias opciones
@@ -148,27 +201,32 @@ def agenda(contactos: list):
     #TODO: Crear un bucle para mostrar el menú y ejecutar las funciones necesarias según la opción seleccionada...
     opcion=0
     while opcion != 8:
+        borrar_consola()
         mostrar_menu()
         opcion = pedir_opcion()
 
         #TODO: Se valorará que utilices la diferencia simétrica de conjuntos para comprobar que la opción es un número entero del 1 al 6
         if int(opcion) in OPCIONES_MENU:
-            if opcion == 1:
+            if opcion == 1:# 1. Nuevo contacto
                 agregar_contacto(contactos)
-            elif opcion == 2:
+            elif opcion == 2:# 2. Modificar contacto
                 modificar_contacto(contactos)
-            elif opcion == 3:
-                input()
-            elif opcion == 4:
-                input()
-            elif opcion == 5:
-                input()
-            elif opcion == 6:
-                input()
-            elif opcion == 7:
-                input()
-
-
+            elif opcion == 3:# 3. Eliminar contacto
+                borrar_consola()
+                eliminar_contacto(input("dame el email del cliente a eliminar: "),contactos)
+                pulse_tecla_para_continuar()
+            elif opcion == 4:# 4. Vaciar agenda
+                vaciar_agenda(contactos)
+                pulse_tecla_para_continuar()
+            elif opcion == 5:# 5. Cargar agenda inicial
+                recargar_contactos(contactos)
+                pulse_tecla_para_continuar()
+            elif opcion == 6:# 6. Mostrar contactos por criterio
+                ordenar_agenda(contactos)
+                pulse_tecla_para_continuar()
+            elif opcion == 7:# 7. Mostrar la agenda completa
+                mostrar_contactos(contactos)
+                pulse_tecla_para_continuar()
 
 def pulse_tecla_para_continuar(): #funciona
     """ Muestra un mensaje y realiza una pausa hasta que se pulse una tecla
@@ -176,7 +234,7 @@ def pulse_tecla_para_continuar(): #funciona
     print("\n")
     os.system("pause")
 
-def validar_email(email:str,contactos): #funciona
+def validar_email(email:str,contactos): #funciona pasa pytest no modificar
     if email =="" or email == " ":
             raise ValueError("el email no puede ser una cadena vacía")
     elif "@" not in email:
@@ -187,38 +245,35 @@ def validar_email(email:str,contactos): #funciona
             if email.upper == elementos.upper:
                 raise ValueError("el email ya existe en la agenda")
 
-def pedir_email(contactos,email): #funciona, cambiar para las pruebas uni
-    verificar="S"
-    while verificar=="S":
-        try:
-            if email == "":
-                print("dime el email del cliente")
-                email=input()
-            verificar="N"
-            validar_email(email,contactos)
-
-        except ValueError as e:
-            print(e)
-            verificar="S"
-            pulse_tecla_para_continuar()
-    return email
+def pedir_email(contactos): #funciona, pasa pytest
+        email=input("dame el email del cliente:\n")
+        validar_email(email,contactos)
+        if email =="" or email == " ":
+            raise ValueError("el email no puede ser una cadena vacía")
+        elif "@" not in email:
+            raise ValueError("el email no es un correo válido")
+        else:
+            for elementos in contactos:
+                elementos=str(elementos['email'])
+                if email.upper == elementos.upper:
+                    raise ValueError("el email ya existe en la agenda")
+        return email
 
 def pedir_nombre(): #funciona
-    print("dime el nombre del cliente")
-    nombre=input()
+    print("dime el nombre del cliente:")
+    nombre=input().title()
     while nombre =="" or nombre == " ":
         nombre=input("***ERROR***, el nombre no puede estar vacio\n dime el nombre del cliente")
-    nombre=nombre.title()
     return nombre
 
 def pedir_apellido(): #funciona
-    print("dime el apellido del cliente")
-    apellidos=input()
+    print("dime el apellido del cliente:")
+    apellidos=input().title()
     while apellidos =="" or apellidos == " ":
         apellidos=input("***ERROR***, el apellido no puede estar vacio\n dime el nombre del cliente")
     return apellidos
 
-def validar_telefono(tlfn): #funciona
+def validar_telefono(tlfn): #funciona, pasa pytest no modificar
     try:
         if (len(tlfn) == 12 or len(tlfn)==9) and ("+" in tlfn or "+" not in tlfn):
             if "+" in tlfn:
@@ -237,22 +292,23 @@ def validar_telefono(tlfn): #funciona
     except ValueError:
         print("el telefono se tecleo mal")
 
-
 def pedir_telefono(contactos): #funciona
     try:
         tlfn=" "
+        numero=1
         telefonos=[]
         while tlfn!= "":
-            tlfn=input("dame el numero de telefono del cliente: ")
+            tlfn=input(f"dame el numero de telefono {numero} del cliente:\n")
             tlfn=tlfn.replace(" ","")
             validar=validar_telefono(tlfn)
             while validar!=True and tlfn!= "":
-                tlfn=input("dame el numero de telefono del cliente(de manera correcta): ")
+                tlfn=input("dame el numero de telefono del cliente(de manera correcta):\n")
                 tlfn=tlfn.replace(" ","")
                 validar=validar_telefono(tlfn)
-            if tlfn != "":
+            if validar==True and tlfn != "":
                 telefonos.append(tlfn)
-    except ValueError as e:
+                numero+=1
+    except ValueError:
         print("el numero de telefono se introducio mal")
         pedir_telefono(contactos)
     else:
@@ -261,20 +317,39 @@ def pedir_telefono(contactos): #funciona
 def pedir_datos(contactos): #funciona
     diccionario_datos_cliente={}
     datos=('nombre','apellido', 'email','telefonos')
+    borrar_consola()
     dato=pedir_nombre()
     diccionario_datos_cliente[datos[0]]=dato
+    borrar_consola()
     dato=pedir_apellido()
     diccionario_datos_cliente[datos[1]]=dato
-    dato=pedir_email(contactos,input("dame el email del cliente: "))
-    diccionario_datos_cliente[datos[2]]=dato
-    dato=pedir_telefono(contactos)
-    diccionario_datos_cliente[datos[3]]=dato
-    print(diccionario_datos_cliente)
-    return diccionario_datos_cliente
+    try:
+        borrar_consola()
+        dato=pedir_email(contactos)
+    except ValueError as e:
+        print(e)
+        print("el cliente no se añadio, empieza de nuevo")
+        pedir_datos(contactos)
+    else:
+        diccionario_datos_cliente[datos[2]]=dato
+        borrar_consola()
+        dato=pedir_telefono(contactos)
+        borrar_consola()
+        diccionario_datos_cliente[datos[3]]=dato
+        return diccionario_datos_cliente
 
 def agregar_contacto(contactos:list): #funciona
-    dato=pedir_datos(contactos)
-    contactos.append(dato)
+    verificar=input("¿quieres agregar un nuevo cliente?(SI/no): ").upper()
+    if verificar=="" or verificar=="SI":
+        borrar_consola()
+        dato=pedir_datos(contactos)
+        numeros=""
+        for i in range(len(dato['telefonos'])):
+            numeros+= f" {dato['telefonos'][i]}"
+        print(f"se agrego el contacto {dato['nombre']} {dato['apellido']} con email: {dato['email']}\n  los telefono/s son:{numeros}")
+        contactos.append(dato)
+    else:
+        print("\nno se añadio ningun contacto nuevo, volviendo al menu")
 
 def mostrar_contactos(contactos):
     print("AGENDA\n------")
@@ -349,7 +424,7 @@ def main():
     borrar_consola()
 
     #TODO: Realizar una llamada a la función eliminar_contacto con todo lo necesario para que funcione correctamente, eliminando el contacto con el email rciruelo@gmail.com
-    eliminar_contacto(contactos)
+    eliminar_contacto("rciruelo@gmail.com",contactos)
 
     pulse_tecla_para_continuar()
     borrar_consola()
