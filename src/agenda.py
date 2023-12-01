@@ -32,6 +32,12 @@ OPCIONES_MENU = {1,2,3,4,5,6,7,8}
 
 def borrar_consola(): #funciona
     """ Limpia la consola
+    Parameters
+    ---------------
+    
+    returns
+    ---------------
+    
     """
     if os.name == "posix":
         os.system ("clear")
@@ -41,7 +47,13 @@ def borrar_consola(): #funciona
 
 def cargar_contactos(contactos: list): #funciona, pasa el pytest no modificar
     """ Carga los contactos iniciales de la agenda desde un fichero
-    ...
+    Parameters
+    ---------------
+        param contactos: list
+        esta es nuestra lista principal, declarada en el main
+    returns
+    ---------------
+        no retorna nada por que las lista no es necesario retorna debido a que no es necesario retorna la lista
     """
     #TODO: Controlar los posibles problemas derivados del uso de ficheros...
     datos=('nombre','apellido','email','telefonos')
@@ -65,21 +77,50 @@ def cargar_contactos(contactos: list): #funciona, pasa el pytest no modificar
                     else:
                         tlfn.append(numero)
             diccionario_clientes[datos[3]]=tlfn.copy()
-            contactos.append(diccionario_clientes.copy())
+            if diccionario_clientes not in contactos:
+                contactos.append(diccionario_clientes.copy())
             tlfn.clear()
             diccionario_clientes.clear()
 
-def buscar_contacto(contactos: list,email):#funciona , pytest funciona, no modificar
+def buscar_contacto(contactos: list,email:str):#funciona , pytest funciona, no modificar
+    """
+    se recorre la lista contacto para que devuelva la posicion en donde esta el email del contacto
+
+    internamente tenemos una lista con elementos en diccionario
+    contactos[{'nombre':nico,'apellido':aprobado,'email':XXXX@gmail.com,'telefono':[123123123,+34132123321]},{'nombre':paco,'apellido':garcia,'email':XXXX@hotmail.com,'telefono':[123129123,+34137123321]}]
+                                                        ---------------                                                                               ----------------
+              ------------------------------------si encuentra este correo la posicion es igual a 0--------- ------------------------------------si encuentra este correo la posicion es igual a 1---------
+    Parameters
+    ---------------
+        param contactos: list
+        esta es nuestra lista principal, declarada en el main
+        param email: str
+        es el email a buscar, que el usuario introduce
+    returns
+    ---------------
+    posicion: int
+        retorna la posicion, donde esta el email dentro de la lista
+        en caso de que no lo encuentre no retorna nada, por defecto la funcion daria el valor: None
+    """
 # esto lo que ase es que tu tienes la lista te la recorre si hay un valor que esta dentro de email te retorna pos quees la posicion de la lista intermanete tengo[d,d1,d2,d3,d4] donde d3 esta en la pos 3, al no poner nada por defecto las funciones retornan none
-    pos=0
+    posicion=0
     for clientes in contactos:
         if clientes['email'] == email:
-            return pos
-        pos+=1
+            return posicion
+        posicion+=1
 
 def eliminar_contacto(email,contactos: list):#funciona
     """ Elimina un contacto de la agenda
-    ...
+        elimina al contacto de la agenda pero solo te imprime por pantalla no retorna nada 
+    Parameters
+    ---------------
+        param email:str
+        es el email que el usuario introduce
+        param contactos: list
+        esta es nuestra lista principal, declarada en el main
+    returns
+    ---------------
+
     """
     try:
         #TODO: Crear función buscar_contacto para recuperar la posición de un contacto con un email determinado
@@ -100,14 +141,45 @@ def eliminar_contacto(email,contactos: list):#funciona
         print("No se eliminó ningún contacto")
 
 def mostrar_menu():#funciona
+    """ muestra las opciones que hay en el programa al usuario
+    Parameters
+    ---------------
+    
+    returns
+    ---------------
+
+    """
     print("1. Nuevo contacto\n2. Modificar contacto\n3. Eliminar contacto\n4. Vaciar agenda\n5. Cargar agenda inicial\n6. Mostrar contactos por criterio\n7. Mostrar la agenda completa\n8. Salir")
 
 def pedir_opcion():#funciona pytest, no modificar
+    """ pide el inputs numero al usuario 
+    Parameters
+    ---------------
+    
+    returns
+    ---------------
+    numero:int
+    devuelve el numero que ha tecleado el usuario, en caso de que el usuario introduzca una letra el == -1
+    """
     numero= input(">> Seleccione una opción:")
     numero=diferencia_simetrica_sino_diego_no_aprueba(numero)
     return numero
 
-def diferencia_simetrica_sino_diego_no_aprueba(opcion): #pasa el py test funciona
+def diferencia_simetrica_sino_diego_no_aprueba(opcion:str): #pasa el py test funciona
+    """ comprueba si opcion esta dentro del conjunto OPCIONES_MENU
+
+    Parameters
+    opcion:str
+
+    ---------------
+    opcion: 
+    returns
+    ---------------
+    opcion: int
+    es la opcion que ha tecleado el usuario
+    -1: int
+    en caso de que el usuario haya añadido alguna letra o numero que no este en OPCIONES_MENU, te retorna -1 debido a que seria como que el usuario a tecleado una opcion invalida
+    """
     try:
         opcion=int(opcion)
         conjunto_a={opcion}
@@ -117,12 +189,25 @@ def diferencia_simetrica_sino_diego_no_aprueba(opcion): #pasa el py test funcion
         if conjunto_d <= OPCIONES_MENU:
             return opcion
         else:
+            print(f"la opcion no es una opcion valida")
             return -1
     except ValueError as e:
         print(f"la opcion no es una opcion valida")
         return -1
 
 def modificar_contacto(contactos:list):
+    """
+    modifica la informacion del diccionario que esta dentro de la lista contacto 
+    imprime en pantalla, si la operacion ha salido bien o mal 
+    Parameters
+    ---------------
+    contactos: list
+        es la lista declarada en el main, donde esta todo los contactos
+    returns
+    ---------------
+    
+    """
+    
     borrar_consola()
     print
     try:
@@ -144,6 +229,17 @@ def modificar_contacto(contactos:list):
         print("No se modifico ningún contacto")
 
 def vaciar_agenda(contactos: list):
+    """
+    elimina todos los contactos de la lista contactos
+    imprime por pantalla si la operacion salio bien o mal
+    Parameters
+    ---------------
+    contactos: list
+        es la lista contactos, donde estan todos los contactos guardados
+    returns
+    ---------------
+    
+    """
     borrar_consola()
     print("se va a eliminar la agenda ENTERA")
     confirmacion=input("¿esta seguro de eliminar la agenda?(si/NO)").upper()
@@ -155,11 +251,30 @@ def vaciar_agenda(contactos: list):
         print("no se elimino la agenda")
 
 def recargar_contactos(contactos):
+    """ inserta los contactos del archivo contactos.csv a la lista contactos
+    Parameters
+    ---------------
+    contactos: list
+        es la lista contactos, donde estan todos los contactos guardados
+    returns
+    ---------------
+    
+    """
     borrar_consola()
     cargar_contactos(contactos)
     print(f"se cargaron contactos {len(contactos)} a la agenda")
 
 def ordenar_agenda(contactos):
+    """ te muestra los contactos que tenga el mismo nombre,apellido,telefono,email
+    para ello el ususario teclea el valor ordenar, que es la clave, y el valor valor que es para comprobar si esta alguien en la agenda
+    Parameters
+    ---------------
+    contactos: list
+        es la lista contactos, donde estan todos los contactos guardados
+    returns
+    ---------------
+    
+    """
     diccionario={}
     lista_telefonos=[]
     ordenar=input("como quieres ordenar la lista(nombre/apellido/email/telefonos): ")
@@ -183,12 +298,28 @@ def ordenar_agenda(contactos):
                     lista_telefonos.append(elementos)
         borrar_consola()
         mostrar_contactos(lista_telefonos)
-
+    if 0 == len(lista_telefonos) or 0 == len(lista_solo_valor):
+        print(f"no se encontro ningun contacto con la informacion {valor}")
             
     else:
         "***ERROR*** --has introducido los parametros mal"
 
-def lista_ordenada(diccionario_ord):
+def lista_ordenada(diccionario_ord:dict):#PD: esta funcion la cree por que me creias que querias que ordenaras la agenda por nombre pero todos los nombres alfabeticamente, pero no era asi 
+    """ esta funcion lo que hace, pasar de esto
+    ejemplo de ordenar por nombre
+    diccionario_ord{ ana:{'nombre':ana,'apellido':vela,'email':XXXX@gmail.com,'telefono':[123123123,+34132123321]},paco:{'nombre':paco,'apellido':garcia,'email':XXXX@hotmail.com,'telefono':[123129123,+34137123321]},nico:{'nombre':nico,'apellido':aprobado,'email':XXXX@gmail.com,'telefono':[123123123,+34132123321]},{'nombre':paco,'apellido':garcia,'email':XXXX@hotmail.com,'telefono':[123129123,+34137123321]}}
+    pasaria a esto
+    lista[{'nombre':ana,'apellido':vela,'email':XXXX@gmail.com,'telefono':[123123123,+34132123321]},{'nombre':paco,'apellido':garcia,'email':XXXX@hotmail.com,'telefono':[123129123,+34137123321]},nico:{'nombre':nico,'apellido':aprobado,'email':XXXX@gmail.com,'telefono':[123123123,+34132123321]},{'nombre':paco,'apellido':garcia,'email':XXXX@hotmail.com,'telefono':[123129123,+34137123321]}]
+    Parameters
+    ---------------
+    diccionario_ord: dict
+        es la lista contactos, donde estan todos los contactos guardados
+    returns
+    ---------------
+    lista : list
+        es la lista creada con todos los valores  creados
+
+    """
     lista=[]
     for elementos in diccionario_ord:
         lista.append(diccionario_ord[elementos])
